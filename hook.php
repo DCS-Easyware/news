@@ -39,7 +39,7 @@ function plugin_news_install() {
          `id`                       INT NOT NULL AUTO_INCREMENT,
          `date_mod`                 TIMESTAMP NOT NULL,
          `name`                     VARCHAR(255) NOT NULL,
-         `message`                  TEXT NOT NULL,
+         `message`                  LONGTEXT NOT NULL,
          `date_start`               TIMESTAMP NULL DEFAULT NULL,
          `date_end`                 TIMESTAMP NULL DEFAULT NULL,
          `type`                     INT NOT NULL,
@@ -176,6 +176,22 @@ function plugin_news_install() {
    if (!$DB->fieldExists("glpi_plugin_news_alerts", "is_displayed_oncentral")) {
       $migration->addField("glpi_plugin_news_alerts", "is_displayed_oncentral", 'bool', ['value' => true]);
    }
+
+
+   $table = 'glpi_plugin_news_alerts';
+   if ($DB->fieldExists($table, 'message')) {
+
+      $query = "ALTER TABLE `glpi_plugin_news_alerts` CHANGE `message` `message` LONGTEXT";
+      $result = $DB->query($query);
+      if (!$result) {
+         Toolbox::logInFile('sql-errors', $DB->error());
+         die ($DB->error());
+      }
+   } else {
+      Toolbox::logInFile('sql-errors', "Field (message) not find in dans glpi_plugin_news_alerts");
+      die ($DB->error());
+   }
+
 
    $migration->executeMigration();
    return true;
